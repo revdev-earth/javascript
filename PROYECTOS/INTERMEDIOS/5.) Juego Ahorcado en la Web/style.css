@@ -1,0 +1,11 @@
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    h1 { color: darkred; }
+    #palabra { font-size: 2em; letter-spacing: 10px; margin: 20px; }
+    #letras button {
+      margin: 3px;
+      padding: 8px 12px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .incorrecta { background: #f8d7da; color: #721c24; }
+    .correcta { background: #d4edda; color: #155724; }
