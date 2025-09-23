@@ -1,0 +1,8 @@
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background: #f9f9f9; }
+    .msg { margin: 5px 0; }
+    .yo { color: blue; }
+    .bot { color: green; }
+    .error { color: red; }
+    input { width: 70%; padding: 5px; }
+    button { padding: 5px 10px; margin-left: 5px; }
