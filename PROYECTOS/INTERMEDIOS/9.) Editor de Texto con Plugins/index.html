@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Texto con Plugins</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>📝 Mini Editor con Plugins</h2>
+
+  <!--  Barra de herramientas -->
+  <div id="toolbar">
+    <button data-comand="bold">Negrita</button>
+    <button data-comand="italic">Cursiva</button>
+    <button data-comand="underline">Subrayado</button>
+  </div>
+
+  <div id="editor" contenteditable="true">
+    ✍️ Escribe tu texto aquí...
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
