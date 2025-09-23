@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de biblioteca</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Biblioteca OnLine</h1>
+
+  <form id="formLibro">
+    <input type="text" id="titulo" placeholder="Titulo" required>
+    <input type="text" id="autor" placeholder="Autor" required>
+    <button type="submit" id="">Agregar libro</button>
+  </form>
+
+  <br>
+  <input type="text" id="buscar" placeholder="Buscar por titulo o autor">
+  <button id="btnBuscar">Buscar</button>
+
+  <div id="mensaje"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Titulo</th>
+        <th>Autor</th>
+        <th>Disponible</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="listaLibros"></tbody>
+  </table>
+
+  <script src="app.js"></script>
+</body>
+</html>
