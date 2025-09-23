@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🌦️ Dashboard de Clima</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    h1 { color: darkblue; }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      display: inline-block;
+      margin-top: 20px;
+      width: 300px;
+      background: #f9f9f9;
+    }
+    .loading { color: orange; font-weight: bold; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>🌦️ Dashboard de Clima</h1>
+
+  <input type="text" id="ciudad" placeholder="Escribe una ciudad">
+  <button id="btnBuscar">Buscar Clima</button>
+
+  <div id="estado" class="loading"></div>
+  <div id="resultado"></div>
+
+  <script>
+    // === Estado global simple ===
+    const estado = {
+      cargando: false,
+      error: null,
+      data: null
+    };
+
+    const API_KEY = "TU_API_KEY_AQUI"; // 👉 Reemplaza con tu API Key de OpenWeatherMap
+    const urlBase = "https://api.openweathermap.org/data/2.5/weather";
+
+    const estadoDiv = document.getElementById("estado");
+    const resultadoDiv = document.getElementById("resultado");
+    const btnBuscar = document.getElementById("btnBuscar");
+    const inputCiudad = document.getElementById("ciudad");
+
+    // === Función para actualizar UI segun el estado ===
+    function render() {
+      if (estado.cargando) {
+        estadoDiv.textContent = "Cargando...";
+        estadoDiv.className = "loading";
+        resultadoDiv.innerHTML = "";
+        return;
+      }
+
+      if (estado.error) {
+        estadoDiv.textContent = estado.error;
+        estadoDiv.className = "error";
+        resultadoDiv.innerHTML = "";
+        return;
+      }
+
+      if (estado.data) {
+        estadoDiv.textContent = "";
+        const { name, main: { temp, humidity }, weather } = estado.data;
+        const descripcion = weather[0].description;
+
+        resultadoDiv.innerHTML = `
+          <div class="card">
+            <h2>${name}</h2>
+            <p>🌡️ Temperatura: ${(temp - 273.15).toFixed(1)} °C</p>
+            <p>💧 Humedad: ${humidity}%</p>
+            <p>☁️ Estado: ${descripcion}</p>
+          </div>
+        `;
+      }
+    }
+
+    // === Función para buscar clima ===
+    async function buscarClima(ciudad) {
+      estado.cargando = true;
+      estado.error = null;
+      render();
+
+      try {
+        const resp = await fetch(`${urlBase}?q=${ciudad}&appid=${API_KEY}`);
+        if (!resp.ok) throw new Error("Ciudad no encontrada o error en la API.");
+
+        const data = await resp.json();
+        estado.data = data;
+      } catch (err) {
+        estado.error = "⚠️ Error: " + err.message;
+      } finally {
+        estado.cargando = false;
+        render();
+      }
+    }
+
+    // === Evento de búsqueda ===
+    btnBuscar.addEventListener("click", () => {
+      const ciudad = inputCiudad.value.trim();
+      if (!ciudad) {
+        estado.error = "⚠️ Por favor ingrese una ciudad.";
+        render();
+        return;
+      }
+      buscarClima(ciudad);
+    });
+  </script>
+</body>
+</html>

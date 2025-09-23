@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Simulado</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background: #f9f9f9; }
+    .msg { margin: 5px 0; }
+    .yo { color: blue; }
+    .bot { color: green; }
+    .error { color: red; }
+    input { width: 70%; padding: 5px; }
+    button { padding: 5px 10px; margin-left: 5px; }
+  </style>
+</head>
+<body>
+  <h1>💬 Chat en Tiempo Real (Simulado)</h1>
+  <div id="chat"></div>
+  <input type="text" id="inputMsg" placeholder="Escribe un mensaje..." />
+  <button id="sendBtn">Enviar</button>
+
+  <script>
+    // === Estado global con patrón Observer ===
+    class ChatState {
+      constructor() {
+        this.mensajes = [];
+        this.observers = [];
+      }
+
+      subscribe(observerFn) {
+        this.observers.push(observerFn);
+      }
+
+      notify() {
+        this.observers.forEach(fn => fn(this.mensajes));
+      }
+
+      addMensaje(mensaje) {
+        this.mensajes.push(mensaje);
+        this.notify();
+      }
+    }
+
+    const chatState = new ChatState();
+
+    // === Simulación de envío con Promises ===
+    function enviarMensaje(usuario, texto) {
+      return new Promise((resolve, reject) => {
+        const delay = Math.random() * 2000 + 500; // 0.5s - 2.5s
+        setTimeout(() => {
+          if (Math.random() < 0.1) { // 10% chance de error
+            reject(new Error("Error de conexión 🚨"));
+          } else {
+            resolve({ usuario, texto, timestamp: new Date().toLocaleTimeString() });
+          }
+        }, delay);
+      });
+    }
+
+    // === Lógica del chat con async/await ===
+    async function procesarEnvio(usuario, texto) {
+      try {
+        const msg = await enviarMensaje(usuario, texto);
+        chatState.addMensaje(msg);
+
+        // Respuesta automática del "bot"
+        if (usuario === "Yo") {
+          const respuesta = await enviarMensaje("Bot", "Recibí tu mensaje: " + texto);
+          chatState.addMensaje(respuesta);
+        }
+
+      } catch (err) {
+        chatState.addMensaje({ usuario: "Sistema", texto: err.message, error: true });
+      }
+    }
+
+    // === UI ===
+    const chatDiv = document.getElementById("chat");
+    chatState.subscribe((mensajes) => {
+      chatDiv.innerHTML = "";
+      mensajes.forEach(m => {
+        const div = document.createElement("div");
+        div.classList.add("msg");
+        div.classList.add(m.error ? "error" : (m.usuario === "Yo" ? "yo" : "bot"));
+        div.textContent = `[${m.usuario}] ${m.texto}`;
+        chatDiv.appendChild(div);
+      });
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    });
+
+    // === Eventos ===
+    const input = document.getElementById("inputMsg");
+    const sendBtn = document.getElementById("sendBtn");
+
+    sendBtn.addEventListener("click", () => {
+      if (input.value.trim() === "") return;
+      procesarEnvio("Yo", input.value.trim());
+      input.value = "";
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+  </script>
+</body>
+</html>

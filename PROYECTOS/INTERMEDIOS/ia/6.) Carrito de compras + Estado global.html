@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🛒 Carrito de Compras</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #333; }
+    .productos, .carrito { margin: 20px 0; }
+    button { margin: 5px; padding: 6px 12px; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>🛒 Carrito de Compras</h1>
+
+  <div class="productos">
+    <h2>Productos</h2>
+    <ul id="listaProductos"></ul>
+  </div>
+
+  <div class="carrito">
+    <h2>Carrito</h2>
+    <ul id="listaCarrito"></ul>
+    <p id="total"></p>
+    <button id="pagar">💳 Pagar</button>
+    <button id="undo">↩️ Undo</button>
+    <button id="redo">↪️ Redo</button>
+  </div>
+
+  <script>
+    // === Estado Global con Observer ===
+    const Store = {
+      estado: {
+        carrito: JSON.parse(localStorage.getItem("carrito")) || []
+      },
+      observadores: [],
+      historial: [],
+      futuro: [],
+
+      suscribir(fn) {
+        this.observadores.push(fn);
+      },
+      notificar() {
+        this.observadores.forEach(fn => fn(this.estado));
+        localStorage.setItem("carrito", JSON.stringify(this.estado.carrito));
+      },
+
+      // --- Gestión del estado con undo/redo ---
+      setCarrito(nuevoCarrito) {
+        this.historial.push([...this.estado.carrito]); // guardar estado previo
+        this.estado.carrito = nuevoCarrito;
+        this.futuro = []; // limpiar redo
+        this.notificar();
+      },
+      undo() {
+        if (this.historial.length > 0) {
+          this.futuro.push([...this.estado.carrito]);
+          this.estado.carrito = this.historial.pop();
+          this.notificar();
+        }
+      },
+      redo() {
+        if (this.futuro.length > 0) {
+          this.historial.push([...this.estado.carrito]);
+          this.estado.carrito = this.futuro.pop();
+          this.notificar();
+        }
+      }
+    };
+
+    // === Productos ===
+    const productos = [
+      { id: 1, nombre: "Laptop", precio: 2500 },
+      { id: 2, nombre: "Teléfono", precio: 1500 },
+      { id: 3, nombre: "Auriculares", precio: 200 }
+    ];
+
+    // === Acciones del carrito ===
+    function agregarProducto(producto) {
+      Store.setCarrito([...Store.estado.carrito, producto]);
+    }
+
+    function eliminarProducto(id) {
+      Store.setCarrito(Store.estado.carrito.filter(p => p.id !== id));
+    }
+
+    function pagarCarrito() {
+      if (Store.estado.carrito.length === 0) {
+        alert("⚠️ No puedes pagar un carrito vacío.");
+        return;
+      }
+      alert("✅ Pago realizado con éxito.");
+      Store.setCarrito([]); // vaciar carrito
+    }
+
+    // === Renderizado ===
+    const listaProductos = document.getElementById("listaProductos");
+    const listaCarrito = document.getElementById("listaCarrito");
+    const total = document.getElementById("total");
+
+    function renderProductos() {
+      listaProductos.innerHTML = "";
+      productos.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = `${p.nombre} - $${p.precio}`;
+        const btn = document.createElement("button");
+        btn.textContent = "Agregar";
+        btn.onclick = () => agregarProducto(p);
+        li.appendChild(btn);
+        listaProductos.appendChild(li);
+      });
+    }
+
+    function renderCarrito(estado) {
+      listaCarrito.innerHTML = "";
+      estado.carrito.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = `${p.nombre} - $${p.precio}`;
+        const btn = document.createElement("button");
+        btn.textContent = "Eliminar";
+        btn.onclick = () => eliminarProducto(p.id);
+        li.appendChild(btn);
+        listaCarrito.appendChild(li);
+      });
+      const suma = estado.carrito.reduce((acc, p) => acc + p.precio, 0);
+      total.textContent = `Total: $${suma}`;
+    }
+
+    // === Inicialización ===
+    renderProductos();
+    Store.suscribir(renderCarrito);
+    Store.notificar(); // para cargar al inicio
+
+    // === Botones principales ===
+    document.getElementById("pagar").onclick = pagarCarrito;
+    document.getElementById("undo").onclick = () => Store.undo();
+    document.getElementById("redo").onclick = () => Store.redo();
+  </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🎵 Reproductor de Música</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #444; }
+    button { margin: 5px; padding: 6px 12px; cursor: pointer; }
+    #estado { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🎵 Reproductor de Música (Mock)</h1>
+
+  <div id="controles">
+    <button id="play">▶️ Reproducir</button>
+    <button id="pause">⏸️ Pausar</button>
+    <button id="next">⏭️ Siguiente</button>
+  </div>
+
+  <p id="cancionActual">Canción actual: Ninguna</p>
+  <p id="estado">Estado: detenido</p>
+
+  <script>
+    // === Clase Canción ===
+    class Cancion {
+      constructor(titulo, artista, archivo) {
+        this.titulo = titulo;
+        this.artista = artista;
+        this.archivo = archivo; // simulación de path
+      }
+    }
+
+    // === Clase Reproductor ===
+    class Reproductor {
+      constructor(listaCanciones = []) {
+        this.lista = listaCanciones;
+        this.indiceActual = 0;
+        this.reproduciendo = false;
+      }
+
+      get cancionActual() {
+        return this.lista[this.indiceActual] || null;
+      }
+
+      async cargarCancion(cancion) {
+        // Simula carga con promesa y timeout
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (!cancion || !cancion.archivo) {
+              reject(new Error("⚠️ Archivo no encontrado"));
+            } else {
+              resolve(`✅ Canción cargada: ${cancion.titulo}`);
+            }
+          }, 1000);
+        });
+      }
+
+      async reproducir() {
+        if (!this.cancionActual) {
+          throw new Error("⚠️ No hay canciones en la lista");
+        }
+        try {
+          const mensaje = await this.cargarCancion(this.cancionActual);
+          console.log(mensaje);
+          this.reproduciendo = true;
+          return `▶️ Reproduciendo: ${this.cancionActual.titulo} - ${this.cancionActual.artista}`;
+        } catch (err) {
+          throw err;
+        }
+      }
+
+      pausar() {
+        if (!this.reproduciendo) {
+          return "⏸️ No hay canción en reproducción";
+        }
+        this.reproduciendo = false;
+        return "⏸️ Canción pausada";
+      }
+
+      siguiente() {
+        if (this.lista.length === 0) {
+          throw new Error("⚠️ Lista de reproducción vacía");
+        }
+        this.indiceActual = (this.indiceActual + 1) % this.lista.length;
+        this.reproduciendo = false;
+        return `⏭️ Cambiaste a: ${this.cancionActual.titulo}`;
+      }
+    }
+
+    // === Datos iniciales (mock) ===
+    const canciones = [
+      new Cancion("Shape of You", "Ed Sheeran", "shapeofyou.mp3"),
+      new Cancion("Blinding Lights", "The Weeknd", "blindinglights.mp3"),
+      new Cancion("Mock Song", "Anon", null) // esta dará error
+    ];
+
+    const reproductor = new Reproductor(canciones);
+
+    // === DOM ===
+    const btnPlay = document.getElementById("play");
+    const btnPause = document.getElementById("pause");
+    const btnNext = document.getElementById("next");
+    const pCancion = document.getElementById("cancionActual");
+    const pEstado = document.getElementById("estado");
+
+    function actualizarUI(mensaje = "") {
+      pCancion.textContent = reproductor.cancionActual
+        ? `Canción actual: ${reproductor.cancionActual.titulo}`
+        : "Canción actual: Ninguna";
+      pEstado.textContent = `Estado: ${mensaje}`;
+    }
+
+    btnPlay.onclick = async () => {
+      try {
+        const msg = await reproductor.reproducir();
+        actualizarUI(msg);
+      } catch (err) {
+        actualizarUI(err.message);
+      }
+    };
+
+    btnPause.onclick = () => {
+      const msg = reproductor.pausar();
+      actualizarUI(msg);
+    };
+
+    btnNext.onclick = () => {
+      try {
+        const msg = reproductor.siguiente();
+        actualizarUI(msg);
+      } catch (err) {
+        actualizarUI(err.message);
+      }
+    };
+
+    // Inicializar UI
+    actualizarUI("detenido");
+
+    // === Testing básico ===
+    console.log("=== TESTING ===");
+    console.log(reproductor.pausar()); // no hay canción
+    console.log(reproductor.siguiente()); // cambia a la siguiente
+  </script>
+</body>
+</html>

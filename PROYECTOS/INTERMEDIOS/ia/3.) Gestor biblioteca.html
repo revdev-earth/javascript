@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📚 Biblioteca Online</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: darkblue; }
+    .error { color: red; }
+    .success { color: green; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h1>📚 Biblioteca Online</h1>
+
+  <form id="formLibro">
+    <input type="text" id="titulo" placeholder="Título" required>
+    <input type="text" id="autor" placeholder="Autor" required>
+    <button type="submit">Agregar Libro</button>
+  </form>
+
+  <br>
+  <input type="text" id="buscar" placeholder="Buscar libro por título o autor">
+  <button id="btnBuscar">Buscar</button>
+
+  <div id="mensaje"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Disponible</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="listaLibros"></tbody>
+  </table>
+
+  <script>
+    // === Clase Libro ===
+    class Libro {
+      constructor(titulo, autor) {
+        this.titulo = titulo;
+        this.autor = autor;
+        this.disponible = true;
+      }
+
+      prestar() {
+        if (!this.disponible) throw new Error("El libro ya está prestado.");
+        this.disponible = false;
+      }
+
+      devolver() {
+        if (this.disponible) throw new Error("El libro ya está en la biblioteca.");
+        this.disponible = true;
+      }
+    }
+
+    // === Clase Biblioteca ===
+    class Biblioteca {
+      constructor() {
+        this.libros = [];
+      }
+
+      agregarLibro(libro) {
+        const existe = this.libros.some(l => l.titulo.toLowerCase() === libro.titulo.toLowerCase());
+        if (existe) throw new Error("Ya existe un libro con ese título.");
+        this.libros.push(libro);
+      }
+
+      buscar(termino) {
+        return this.libros.filter(l => 
+          l.titulo.toLowerCase().includes(termino.toLowerCase()) ||
+          l.autor.toLowerCase().includes(termino.toLowerCase())
+        );
+      }
+    }
+
+    const biblioteca = new Biblioteca();
+
+    // === DOM ===
+    const formLibro = document.getElementById("formLibro");
+    const listaLibros = document.getElementById("listaLibros");
+    const mensaje = document.getElementById("mensaje");
+    const buscarInput = document.getElementById("buscar");
+    const btnBuscar = document.getElementById("btnBuscar");
+
+    function mostrarMensaje(texto, tipo="success") {
+      mensaje.textContent = texto;
+      mensaje.className = tipo;
+      setTimeout(() => mensaje.textContent = "", 3000);
+    }
+
+    function renderizarLibros(libros = biblioteca.libros) {
+      listaLibros.innerHTML = "";
+      libros.forEach((libro, index) => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${libro.titulo}</td>
+          <td>${libro.autor}</td>
+          <td>${libro.disponible ? "✅ Sí" : "❌ No"}</td>
+          <td>
+            <button onclick="prestarLibro(${index})">Prestar</button>
+            <button onclick="devolverLibro(${index})">Devolver</button>
+          </td>
+        `;
+        listaLibros.appendChild(fila);
+      });
+    }
+
+    // === Eventos ===
+    formLibro.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const titulo = document.getElementById("titulo").value.trim();
+      const autor = document.getElementById("autor").value.trim();
+
+      try {
+        const nuevoLibro = new Libro(titulo, autor);
+        biblioteca.agregarLibro(nuevoLibro);
+        mostrarMensaje("Libro agregado con éxito ✅");
+        formLibro.reset();
+        renderizarLibros();
+      } catch (err) {
+        mostrarMensaje(err.message, "error");
+      }
+    });
+
+    btnBuscar.addEventListener("click", () => {
+      const termino = buscarInput.value.trim();
+      const resultados = biblioteca.buscar(termino);
+      renderizarLibros(resultados);
+      if (resultados.length === 0) mostrarMensaje("No se encontraron libros.", "error");
+    });
+
+    // === Funciones globales para botones ===
+    window.prestarLibro = function(index) {
+      try {
+        biblioteca.libros[index].prestar();
+        renderizarLibros();
+      } catch (err) {
+        mostrarMensaje(err.message, "error");
+      }
+    }
+
+    window.devolverLibro = function(index) {
+      try {
+        biblioteca.libros[index].devolver();
+        renderizarLibros();
+      } catch (err) {
+        mostrarMensaje(err.message, "error");
+      }
+    }
+  </script>
+</body>
+</html>

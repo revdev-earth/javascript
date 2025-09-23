@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📝 Editor de Texto con Plugins</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #toolbar button { margin: 4px; padding: 6px 10px; cursor: pointer; }
+    #editor { 
+      width: 100%; 
+      min-height: 150px; 
+      border: 1px solid #ccc; 
+      padding: 10px;
+      margin-top: 10px; 
+    }
+  </style>
+</head>
+<body>
+  <h2>📝 Mini Editor con Plugins</h2>
+
+  <!-- Barra de herramientas -->
+  <div id="toolbar">
+    <button data-command="bold">Negrita</button>
+    <button data-command="italic">Cursiva</button>
+    <button data-command="underline">Subrayado</button>
+  </div>
+
+  <!-- Área editable -->
+  <div id="editor" contenteditable="true">
+    ✍️ Escribe tu texto aquí...
+  </div>
+
+  <script type="module">
+    // === Clase principal del editor ===
+    class Editor {
+      constructor(editorElement) {
+        this.editorElement = editorElement;
+        this.plugins = [];
+      }
+
+      ejecutarComando(comando) {
+        document.execCommand(comando, false, null);
+      }
+
+      usar(plugin) {
+        if (typeof plugin.extend !== "function") {
+          throw new Error("⚠️ Plugin no compatible: debe implementar método extend()");
+        }
+        plugin.extend(this); // el plugin recibe el editor
+        this.plugins.push(plugin);
+        console.log(`✅ Plugin "${plugin.constructor.name}" cargado`);
+      }
+    }
+
+    // === Plugin base (para extender) ===
+    class Plugin {
+      extend(editor) {
+        throw new Error("Debe implementarse en el plugin hijo");
+      }
+    }
+
+    // === Ejemplo de plugin: contador de palabras ===
+    class WordCountPlugin extends Plugin {
+      extend(editor) {
+        const counter = document.createElement("p");
+        counter.style.fontWeight = "bold";
+        counter.textContent = "Palabras: 0";
+        editor.editorElement.insertAdjacentElement("afterend", counter);
+
+        editor.editorElement.addEventListener("input", () => {
+          const text = editor.editorElement.innerText.trim();
+          const wordCount = text.length ? text.split(/\s+/).length : 0;
+          counter.textContent = `Palabras: ${wordCount}`;
+        });
+      }
+    }
+
+    // === Instancia del editor ===
+    const editorElement = document.getElementById("editor");
+    const editor = new Editor(editorElement);
+
+    // Botones básicos
+    document.getElementById("toolbar").addEventListener("click", (e) => {
+      if (e.target.dataset.command) {
+        editor.ejecutarComando(e.target.dataset.command);
+      }
+    });
+
+    // === Cargar un plugin ===
+    try {
+      editor.usar(new WordCountPlugin()); // agrega contador de palabras
+    } catch (err) {
+      console.error("Error cargando plugin:", err.message);
+    }
+
+    // === Ejemplo de plugin inválido ===
+    try {
+      editor.usar({ nombre: "PluginMalo" }); // no implementa extend()
+    } catch (err) {
+      console.error("Error esperado:", err.message);
+    }
+  </script>
+</body>
+</html>
