@@ -1,7 +1,7 @@
 import  {useState} from "react"
 import {dispatch} from "../store/store"
 
-export default function TaskDorm() {
+export default function TaskForm() {
   const [text, setText] = useState("")
 
 const handleSubmit = (e) => {
