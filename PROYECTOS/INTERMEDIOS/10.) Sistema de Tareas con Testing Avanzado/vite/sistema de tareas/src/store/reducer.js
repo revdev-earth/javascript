@@ -15,7 +15,9 @@ export function reducer(state, action) {
       return {
         ...state,
         tasks: state.tasks.map((t) => {
-          t.id === action.payload.id ? { ...t, ...action.payload } : t;
+          return t.id === action.payload.id
+            ? { ...t, text: action.payload.text }
+            : t;
         }),
       };
 
@@ -23,7 +25,7 @@ export function reducer(state, action) {
       return {
         ...state,
         tasks: state.tasks.filter(
-          (t) => t && t.id !== action.payload.id // validamos que t no sea null
+          (t) => t && t.id !== action.payload // validamos que t no sea null
         ),
       };
   }
