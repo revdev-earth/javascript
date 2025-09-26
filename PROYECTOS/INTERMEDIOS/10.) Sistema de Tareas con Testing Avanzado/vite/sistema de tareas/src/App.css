@@ -5,10 +5,48 @@
   text-align: center;
 }
 
+button, input {
+  font-size: 20px;
+}
+
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
+  background-color: lightsteelblue;
 }
 button {
   margin-left: 5px;
+  background-color: beige;
+    border-style: solid ;
+  border-width: 1px;
+  border-color: blue;
+}
+button:hover{
+  transform: scale(1.05);
+}
+button:active {
+  transform: scale(1);
+
+}
+input {
+  padding: 10px 16px;
+}
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style-type: none;
+}
+
+li {
+  font-size: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+li> div{
+  display: flex;
+  align-items: center;
+  justify-content: space-around
 }

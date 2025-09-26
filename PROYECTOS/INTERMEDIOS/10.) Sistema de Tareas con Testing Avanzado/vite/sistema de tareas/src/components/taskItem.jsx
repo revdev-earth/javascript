@@ -11,9 +11,13 @@ export default function TaskItem({task}) {
     <li>
 
 
+      <div>
       {task.text}
-      <button onClick={eliminar}>❌</button>
-      <button onClick={() => setModal(true)}>🖋</button>
+        <div>
+          <button onClick={eliminar}>❌</button>
+          <button onClick={() => setModal(true)}>🖋</button>
+        </div>
+      </div>
 
        <EditForm 
         texto={task.text} 
