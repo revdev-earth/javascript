@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { postJSON } from "../services/api";
+import { postJSON } from "../services/api.js";
 
 const AuthContext = createContext();
 

@@ -1,16 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
-
-// ✅ resolver __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ✅ cargar .env antes de otros imports
-dotenv.config({ path: path.join(__dirname, ".env") });
 
 import authRoutes from "./controllers/authController.js";
 import { authenticateAccessToken } from "./middleware/authMiddleware.js";
