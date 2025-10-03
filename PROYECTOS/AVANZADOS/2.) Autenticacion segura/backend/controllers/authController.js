@@ -56,6 +56,8 @@ router.post(
     const hash = await bcrypt.hash(password, 10);
     const id = uuidv4();
     users.set(username, { id, username, passwordHash: hash });
+
+    console.log("Registrado con exito ", username, password);
     return res.status(201).json({ message: "User created" });
   }
 );

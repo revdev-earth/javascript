@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
+console.log("ACCESS_SECRET:", process.env.ACCESS_TOKEN_SECRET);
+console.log("REFRESH_SECRET:", process.env.REFRESH_TOKEN_SECRET);
+
 export function signAccessToken(payload) {
   return jwt.sign(payload, ACCESS_SECRET, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "300s",

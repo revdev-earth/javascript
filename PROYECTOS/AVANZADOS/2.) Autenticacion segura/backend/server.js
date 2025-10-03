@@ -2,9 +2,18 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import authRoutes from "./controllers/authController.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+// ✅ resolver __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ cargar .env antes de otros imports
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+import authRoutes from "./controllers/authController.js";
+import { authenticateAccessToken } from "./middleware/authMiddleware.js";
 
 const app = express();
 app.use(express.json());
@@ -21,7 +30,6 @@ app.use(
 app.use("/auth", authRoutes);
 
 // Ejemplo de ruta protegida
-import { authenticateAccessToken } from "./middleware/authMiddleware.js";
 app.get("/protected", authenticateAccessToken, (req, res) => {
   res.json({ message: `Hello ${req.user.username}. This is protected.` });
 });

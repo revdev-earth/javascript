@@ -39,6 +39,7 @@ export function AuthProvider({ children }) {
       }
     } catch (err) {
       // ignore
+      throw new Error(":: Error de callback :: ", err.message)
     }
     setAccessToken(null);
     setUser(null);
