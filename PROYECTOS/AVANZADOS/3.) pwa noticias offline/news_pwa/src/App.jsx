@@ -3,6 +3,7 @@ import OfflineBanner from "./components/OfflineBanner";
 import { getSavedNews, saveNews } from "./services/db";
 import { fetchNews } from "./services/api";
 import NewsList from "./components/NewList";
+import Api from "./components/api";
 
 function App() {
     const [news, setNews] = useState([]);
@@ -46,6 +47,7 @@ function App() {
       {!online && <OfflineBanner />}
       <h1 className="text-2xl font-bold mb-4">📰 Noticias</h1>
       <NewsList news={news} />
+      <Api />
     </div>
   )
 }
