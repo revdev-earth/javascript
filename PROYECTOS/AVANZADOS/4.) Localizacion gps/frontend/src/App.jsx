@@ -1,76 +1,49 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
-import LocaleSelector from "./components/LocaleSelector";
-import ContactForm from "./components/ContactForm";
-import ContactList from "./components/ContactList";
-import { detectLocale, detectTimeZone } from "./utils/intl";
-import { loadContacts, saveContacts } from "./utils/storage";
-
-const CalendarPage = lazy(() => import("./pages/CalendarPage"));
+import { useState } from "react";
 
 export default function App() {
-  const [locale, setLocale] = useState(detectLocale());
-  const [timeZone, setTimeZone] = useState(detectTimeZone());
-  const [contacts, setContacts] = useState(() => loadContacts());
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    saveContacts(contacts);
-  }, [contacts]);
-
-  function onAdd(contact) {
-    // prevent duplicate by name (case-insensitive)
-    if (contacts.some(c => c.name.toLowerCase() === contact.name.toLowerCase())) {
-      return alert("Ya existe un contacto con ese nombre.");
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocalización no soportada por este navegador.");
+      return;
     }
-    setContacts(prev => [contact, ...prev]);
-  }
 
-  function onRemove(id) {
-    setContacts(prev => prev.filter(c => c.id !== id));
-  }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setError(null);
+        setLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+      },
+      (err) => {
+        setLocation(null);
+        setError(`Error obteniendo ubicación: ${err.message}`);
+      }
+    );
+  };
 
   return (
-    <div className="container">
-      <header className="header">
-        <div>
-          <h1>Plataforma de Localización Global</h1>
-          <p className="small">Locale detectado: <strong>{locale}</strong> · TimeZone: <strong>{timeZone}</strong></p>
-        </div>
-        <div className="controls">
-          <button className="primary" onClick={() => { setLocale(detectLocale()); setTimeZone(detectTimeZone()); }}>
-            Detectar automáticamente
-          </button>
-        </div>
-      </header>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 font-sans">
+      <h1 className="text-2xl font-bold mb-4">Obtener Ubicación</h1>
 
-      <main style={{ marginTop: 16, display: "grid", gap: 12 }}>
-        <LocaleSelector locale={locale} tz={timeZone} onChange={(patch) => {
-          if (patch.locale) setLocale(patch.locale);
-          if (patch.timeZone) setTimeZone(patch.timeZone);
-        }} />
+      <button
+        onClick={handleGetLocation}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+      >
+        Obtener mi ubicación
+      </button>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div>
-            <ContactForm onAdd={onAdd} />
-            <ContactList contacts={contacts} locale={locale} onRemove={onRemove} />
-          </div>
+      {location && (
+        <p className="mt-4 text-green-700">
+          Latitud: {location.lat} <br />
+          Longitud: {location.lon}
+        </p>
+      )}
 
-          <div>
-            <Suspense fallback={<div className="card">Cargando calendario...</div>}>
-              <CalendarPage locale={locale} timeZone={timeZone} />
-            </Suspense>
-
-            <div className="card small" style={{ marginTop: 12 }}>
-              <strong>Accesibilidad</strong>
-              <ul>
-                <li>Inputs con etiquetas y ARIA.</li>
-                <li>Contrastes altos y foco visible.</li>
-                <li>Persistencia de datos local (localStorage).</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </main>
+      {error && <p className="mt-4 text-red-600">{error}</p>}
     </div>
   );
 }
-                                                                  
